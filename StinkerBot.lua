@@ -287,6 +287,8 @@ client:on("messageCreate", function(message)
 
 
 	log( ">Command found, working…", "info" )
+  
+  data.channel:broadcastTyping()
 
 	log( ">USER:\t" .. data.user.username .. " (" .. tostring(data.user) .. ")", "debug" )
 	log( ">CHANNEL:\t" .. data.channel.name .. " (" .. tostring(data.channel) .. ")", "debug" )
