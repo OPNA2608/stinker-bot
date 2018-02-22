@@ -273,7 +273,7 @@ client:on("messageCreate", function(message)
 	data.channel			= message.channel
 	data.content			= message.content
 	data.command, data.arguments	= data.content:match( "^![sS][bB][lL]_(%S*)%s*(.*)$" )
-  data.attachments  = message.attachments or {}
+	data.attachments  = message.attachments or {}
 	
 	log( "<Message received!", "debug" )
 
@@ -290,12 +290,12 @@ client:on("messageCreate", function(message)
   
   data.channel:broadcastTyping()
 
-	log( ">USER:\t" .. data.user.username .. " (" .. tostring(data.user) .. ")", "debug" )
-	log( ">CHANNEL:\t" .. data.channel.name .. " (" .. tostring(data.channel) .. ")", "debug" )
-	log( ">MESSAGE:\t" .. tostring(data.content), "debug" )
-  log( ">ATTACHMENTS:\t" .. tostring(#data.attachments), "debug" )
-	log( ">COMMAND:\t" .. data.command, "info" )
-	log( ">ARGUMENTS:\t" .. tostring(data.arguments), "info" )
+	log( "=USER:\t" .. data.user.username .. " (" .. tostring(data.user) .. ")", "debug" )
+	log( "=CHANNEL:\t" .. data.channel.name .. " (" .. tostring(data.channel) .. ")", "debug" )
+	log( "=MESSAGE:\t" .. tostring(data.content), "debug" )
+	log( "=ATTACHMENTS:\t" .. tostring(#data.attachments), "debug" )
+	log( "=COMMAND:\t" .. data.command, "info" )
+	log( "=ARGUMENTS:\t" .. tostring(data.arguments), "info" )
 
   local command = COMMANDS[data.command]
   if command ~= nil
