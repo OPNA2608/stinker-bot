@@ -15,28 +15,19 @@ LOGFILETEMP   = ""
 LOGFILEOPENED = false
 
 function config( data )
+  _G.LOGFILE      = "bot.log"
+  _G.QUOTEFILE    = "quotes.cfg"
+  _G.COMMANDSFILE = "commands.cfg"
+  _G._sizeFILES   = {
+    "StinkerBot.lua",
+    "bot.cfg",
+    "quotes.cfg",
+    "commands.cfg",
+  }
+   
   for k,v in pairs( data ) do
     _G[k] = v
   end
-  
-  
-  if not _G.LOGFILE then 
-    _G.LOGFILE      = "bot.log" end
-    
-  if not _G.QUOTEFILE then 
-    _G.QUOTEFILE    = "quotes.cfg" end
-    
-  if not _G.COMMANDSFILE then 
-    _G.COMMANDSFILE = "commands.cfg" end
-   
-  if not _G._sizeFILES then
-    _G._sizeFILES   = {
-      "StinkerBot.lua",
-      "bot.cfg",
-      "quotes.cfg",
-      "commands.cfg",
-    } end
-   
    
   LOG           = io.open( LOGFILE, "a" )
   LOGFILEOPENED = true
@@ -57,28 +48,28 @@ function log( message, level )
     err   = "ERROR",
   }
   
-  local sLevel = levels[level]
+  local sLevel = type(level) == "string" and levels[level] or nil
   if not sLevel then
-    log(  "Attempted to use unknown logging level "
+    log(  "Attempted to use unknown logging level \""
           .. tostring(level)
-          .. "! Defaulting to WARNING…", "warn" )
+          .. "\" (of type "
+          .. type(level)
+          .. ")! Defaulting to WARNING…", "warn" )
     print(debug.traceback())
     sLevel = levels["warn"]
   end
   
 	local newMessage = 
     os.date("%c")
-    .. " ["
-    .. os.clock()
-    .. "] \t"
-    .. "|" .. sLevel .. "|\t"
+    .. " [" .. string.format("%.6f", os.clock()) .. "]"
+    .. " | " .. sLevel .. "\t|\t"
     .. tostring(message)
 	print( newMessage )
   
   if not LOGFILEOPENED then
     LOGFILETEMP = LOGFILETEMP .. newMessage
   elseif #LOGFILETEMP ~= 0 then
-    LOG:write( LOGFILETEMP )
+    LOG:write( LOGFILETEMP .. "\n" )
     LOGFILETEMP = ""
   else
     LOG:write( newMessage .. "\n" )
@@ -124,22 +115,39 @@ quotes {
 
 	local out = io.open( QUOTEFILE, "w" )
 	out:write( header )
+  
+  local function requiredEquals( line )
+    local match = line:match( "%]=*%]" )
+    local starting, ending = nil,nil
+    if match then
+      starting, ending = match:find( "=+" )
+    end
+    return  match
+              and starting
+              and string.rep( "=", ending+2 - starting)
+            or match
+              and "="
+            or ""
+  end
 
 	for k,v in ipairs( QUOTES ) do
 
 		if not v.by and not v.attachments then
 			out:write('\t"' .. v.text .. '",\n\n')
 		else
-      local text = "\t{\n\n\t\tquote = [[" .. v.text .. "]],\n"
+      local equals = requiredEquals( v.text )
+      local text = "\t{\n\n\t\tquote = [" .. equals .. "[" .. v.text .. "]" .. equals .. "],\n"
 			if v.by then
-        text = text .. "\t\tby    = [[" .. v.by .. "]],\n"
+        local equals = requiredEquals( v.by )
+        text = text .. "\t\tby    = [" .. equals .. "[" .. v.by .. "]" .. equals .. "],\n"
       end
       if v.attachments and #v.attachments > 0 then
         text =  text .. "\t\tattachments = {\n"
         for _,attachmFile in ipairs(v.attachments) do
-          text =  text .. "\t\t\t[["
+          local equals = requiredEquals( attachmFile )
+          text =  text .. "\t\t\t[" .. equals .. "["
                   .. attachmFile
-                  .. "]],\n"
+                  .. "]" .. equals .. "],\n"
         end
         text = text .. "\t\t},\n"
       end
@@ -172,7 +180,6 @@ _G.serialize= serialize
   || * the bot's ID for later ignoring of echo  (SELF)
   || * the table for all quotes                 (QUOTES)
   || * the table of the commands + help data    (COMMANDS)
-  || * the order/structure of the help output   (ORDER)
 --]]
 
 
